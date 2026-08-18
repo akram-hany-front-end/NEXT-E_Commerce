@@ -6,6 +6,7 @@ export const translations = {
             about: "من نحن",
             contact: "تواصل معنا",
             cart: "السلة",
+            search:"ابحث عن منتج",
         },
 
         home: {
@@ -14,6 +15,7 @@ export const translations = {
                 "اكتشف تشكيلتنا المختارة من الأثاث العصري بتصميم يجمع بين الفخامة والراحة.",
             shopNow: "تسوق الآن",
             discover: "اكتشف مجموعتنا",
+
         },
     },
 
@@ -24,6 +26,8 @@ export const translations = {
             about: "About Us",
             contact: "Contact",
             cart: "Cart",
+                        search:"Search products",
+
         },
 
         home: {
