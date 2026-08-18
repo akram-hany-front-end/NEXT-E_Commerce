@@ -14,6 +14,7 @@ export const translations = {
             users: "المستخدمين",
             dashboard: "لوحة التحكم",
             orders: "الطلبات",
+            profile: "الملف الشخصي",
         },
 
         home: {
@@ -40,6 +41,8 @@ export const translations = {
             message: "Messages",
             products: "Products",    
                     dashboard: "Dashboard",
+                                profile: "Profile",
+
 
             users: "Users",
             orders: "Orders",

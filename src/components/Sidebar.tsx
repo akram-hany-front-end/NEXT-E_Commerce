@@ -10,6 +10,7 @@ import {
   Users,
   Package,
   ShoppingBag,
+  LayoutDashboard,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -20,6 +21,12 @@ export default function Sidebar() {
   const t = translations[language];
 
   const adminLinks = [
+    
+    {
+      title: t.sidebar.dashboard,
+      href: "/admin/",
+      icon: LayoutDashboard,
+    },
     {
       title: t.sidebar.message,
       href: "/admin/messages",
@@ -38,6 +45,11 @@ export default function Sidebar() {
     {
       title: t.sidebar.orders,
       href: "/admin/orders",
+      icon: ShoppingBag,
+    },
+    {
+      title: t.sidebar.profile,
+      href: "/admin/profile",
       icon: ShoppingBag,
     },
   ];
