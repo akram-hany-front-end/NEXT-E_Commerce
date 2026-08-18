@@ -6,7 +6,14 @@ export const translations = {
             about: "من نحن",
             contact: "تواصل معنا",
             cart: "السلة",
-            search:"ابحث عن منتج",
+            search: "ابحث عن منتج",
+        },
+        sidebar: {
+            message: "الرسائل",
+            products: "المنتجات",
+            users: "المستخدمين",
+            dashboard: "لوحة التحكم",
+            orders: "الطلبات",
         },
 
         home: {
@@ -26,8 +33,16 @@ export const translations = {
             about: "About Us",
             contact: "Contact",
             cart: "Cart",
-                        search:"Search products",
+            search: "Search products",
 
+        },
+        sidebar: {
+            message: "Messages",
+            products: "Products",    
+                    dashboard: "Dashboard",
+
+            users: "Users",
+            orders: "Orders",
         },
 
         home: {
