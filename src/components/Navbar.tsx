@@ -3,21 +3,24 @@
 import { useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { useTheme } from "@/components/ThemeProvider";
-
+import { useCart } from "@/components/CartProvider";
 import Image from "next/image";
 import Link from "next/link";
-
+import { useFavorites } from "@/components/FavoritesProvider";
 import { translations } from "./translation";
 
 import {
     Moon,
+    ShoppingCart,
     Search,
     Sun,
     Menu,
     X,
+    Heart,
 } from "lucide-react";
 
 export default function Navbar() {
+    const { cartCount } = useCart();
     const { language, setLanguage } = useLanguage();
     const { theme, setTheme } = useTheme();
 
@@ -36,7 +39,7 @@ export default function Navbar() {
     const closeMenu = () => {
         setIsMenuOpen(false);
     };
-
+    const { favorites } = useFavorites();
     return (
         <nav className="relative flex items-center justify-center gap-50 border-b border-[var(--border)] bg-[var(--background)] px-3 py-4 sm:gap-6 md:gap-10 lg:gap-20 xl:gap-50">
 
@@ -69,14 +72,14 @@ export default function Navbar() {
                 </Link>
 
                 <Link
-                    href="/about"
+                    href="/aboutus"
                     className="text-[var(--foreground)] transition-opacity hover:opacity-70"
                 >
                     {t.navbar.about}
                 </Link>
 
                 <Link
-                    href="/contact"
+                    href="/contactus"
                     className="text-[var(--foreground)] transition-opacity hover:opacity-70"
                 >
                     {t.navbar.contact}
@@ -122,6 +125,33 @@ export default function Navbar() {
                         <Moon size={18} />
                     )}
                 </button>
+                <Link
+                    href="/cart"
+                    className="relative rounded-full border p-2 text-[var(--foreground)] transition hover:border-[var(--primary)]"
+                >
+                    <ShoppingCart size={18} />
+
+                    {cartCount > 0 && (
+                        <span className="absolute -end-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--primary)] px-1 text-[10px] font-bold text-white">
+                            {cartCount}
+                        </span>
+                    )}
+                </Link>
+                <Link
+                    href="/favorites"
+                    className="relative rounded-full border border-[var(--border)] p-2 text-[var(--foreground)] transition hover:border-[var(--primary)]"
+                >
+                    <Heart
+                        size={18}
+                        className="transition"
+                    />
+
+                    {favorites.length > 0 && (
+                        <span className="absolute -end-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--primary)] px-1 text-[10px] font-bold text-white">
+                            {favorites.length}
+                        </span>
+                    )}
+                </Link>
 
             </div>
 
@@ -216,9 +246,49 @@ export default function Navbar() {
                             >
                                 {t.navbar.contact}
                             </Link>
-
+                        
                         </div>
 
+<div className="">
+        <Link
+                                href="/favorites"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="flex items-center justify-between rounded-lg  py-3"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Heart size={25} />
+                                    <span>
+                                        {language === "ar" ? "المفضلة" : "Favorites"}
+                                    </span>
+                                </div>
+
+                                {favorites.length > 0 && (
+                                    <span className="rounded-full bg-[var(--primary)] px-2 py-1 text-xs text-white">
+                                        {favorites.length}
+                                    </span>
+                                )}
+                            </Link>
+
+<Link
+  href="/cart"
+  onClick={() => setIsMenuOpen(false)}
+  className="flex items-center justify-between rounded-lg  py-3 text-[var(--foreground)] transition hover:bg-[var(--background)]"
+>
+  <div className="flex items-center gap-3">
+    <ShoppingCart size={25} />
+
+    <span>
+      {language === "ar" ? "السلة" : "Cart"}
+    </span>
+  </div>
+
+  {cartCount > 0 && (
+    <span className="rounded-full bg-[var(--primary)] px-2 py-1 text-xs font-medium text-white">
+      {cartCount}
+    </span>
+  )}
+</Link>
+</div>
                         {/* Mobile Search */}
                         <div className="relative mt-10">
 
