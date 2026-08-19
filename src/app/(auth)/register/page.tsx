@@ -16,12 +16,148 @@ import { useLanguage } from "@/components/LanguageProvider";
 export default function RegisterPage() {
     const { language } = useLanguage();
     const isArabic = language === "ar";
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        governorate: "",
+        city: "",
+        details: "",
+        password: "",
+        confirmPassword: "",
+    });
 
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
     const [showPassword, setShowPassword] =
         useState(false);
 
     const [showConfirmPassword, setShowConfirmPassword] =
         useState(false);
+
+
+    const handleChange = (
+        e: React.ChangeEvent<
+            HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+        >
+    ) => {
+        const { id, value } = e.target;
+
+        setFormData((prev) => ({
+            ...prev,
+            [id]: value,
+        }));
+    };
+    const handleSubmit = async (
+        e: React.FormEvent<HTMLFormElement>
+    ) => {
+        e.preventDefault();
+
+        setError("");
+        setSuccess("");
+console.log(formData ,"before")
+
+if (!formData.name){
+    alert("name needed")
+    return;
+}
+if (!formData.email){
+    alert("email needed")
+    return;
+}
+if (!formData.city){
+    alert("city needed")
+    return;
+}
+if (!formData.governorate){
+    alert("governorate needed")
+    return;
+}
+if (!formData.details){
+    alert("details needed")
+    return;
+}
+if (!formData.password){
+    alert("password needed")
+    return;
+}
+if (!formData.confirmPassword){
+    alert("confirmPassword needed")
+    return;
+}
+console.log(formData, "after")
+
+        if (formData.password !== formData.confirmPassword) {
+            setError(
+                isArabic
+                    ? "كلمتا المرور غير متطابقتين"
+                    : "Passwords do not match"
+            );
+
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            const response = await fetch(
+                "/api/auth/register",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        name: formData.name,
+                        email: formData.email,
+                        phone: formData.phone,
+
+                        address: {
+                            governorate: formData.governorate,
+                            city: formData.city,
+                            details: formData.details,
+                        },
+
+                        password: formData.password,
+                        confirmPassword: formData.confirmPassword,
+                    }),
+                }
+            );
+            const data = await response.json();
+            console.log(data)
+
+            if (!response.ok) {
+                throw new Error(data.message);
+            }
+
+            setSuccess(
+                isArabic
+                    ? "تم إنشاء الحساب بنجاح"
+                    : "Account created successfully"
+            );
+
+            setFormData({
+                name: "",
+                email: "",
+                phone: "",
+                governorate: "",
+                city: "",
+                details: "",
+                password: "",                       
+                confirmPassword: "",
+            });
+
+        } catch (error) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Something went wrong"
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <main className="flex min-h-screen items-center justify-center bg-[var(--background)] px-5 py-10">
@@ -57,7 +193,10 @@ export default function RegisterPage() {
 
                 <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm md:p-8">
 
-<form className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <form
+                        onSubmit={handleSubmit}
+
+                        className="grid grid-cols-1 gap-5 md:grid-cols-2">
                         {/* Name */}
 
                         <div>
@@ -80,6 +219,9 @@ export default function RegisterPage() {
 
                                 <input
                                     id="name"
+                                    value={formData.name}
+                                                                        onChange={handleChange}
+
                                     type="text"
                                     placeholder={
                                         isArabic
@@ -115,6 +257,8 @@ export default function RegisterPage() {
 
                                 <input
                                     id="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
                                     type="email"
                                     placeholder="example@email.com"
                                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] py-3 pe-4 ps-11 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]"
@@ -146,6 +290,8 @@ export default function RegisterPage() {
 
                                 <input
                                     id="phone"
+                                    value={formData.phone}
+                                    onChange={handleChange}
                                     type="tel"
                                     placeholder="01xxxxxxxxx"
                                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] py-3 pe-4 ps-11 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]"
@@ -177,6 +323,8 @@ export default function RegisterPage() {
 
                                 <input
                                     id="password"
+                                    value={formData.password}
+                                    onChange={handleChange}
                                     type={showPassword ? "text" : "password"}
                                     placeholder={
                                         isArabic
@@ -231,6 +379,8 @@ export default function RegisterPage() {
                                             ? "text"
                                             : "password"
                                     }
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
                                     placeholder={
                                         isArabic
                                             ? "أعد كتابة كلمة المرور"
@@ -260,105 +410,111 @@ export default function RegisterPage() {
                         </div>
 
 
-{/* City */}
+                        {/* City */}
 
-<div>
-  <label
-    htmlFor="city"
-    className="mb-2 block text-sm font-medium text-[var(--foreground)]"
-  >
-    {isArabic ? "المدينة / المنطقة" : "City / Area"}
-  </label>
+                        <div>
+                            <label
+                                htmlFor="city"
+                                className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                            >
+                                {isArabic ? "المدينة / المنطقة" : "City / Area"}
+                            </label>
 
-  <input
-    id="city"
-    type="text"
-    placeholder={
-      isArabic
-        ? "مثال: المنصورة"
-        : "Example: Mansoura"
-    }
-    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]"
-  />
-</div>
-{/* Governorate */}
+                            <input
+                                id="city"
+                                value={formData.city}
+                                onChange={handleChange}
+                                type="text"
+                                placeholder={
+                                    isArabic
+                                        ? "مثال: المنصورة"
+                                        : "Example: Mansoura"
+                                }
+                                className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]"
+                            />
+                        </div>
+                        {/* Governorate */}
 
-<div>
-  <label
-    htmlFor="governorate"
-    className="mb-2 block text-sm font-medium text-[var(--foreground)]"
-  >
-    {isArabic ? "المحافظة" : "Governorate"}
-  </label>
+                        <div>
+                            <label
+                                htmlFor="governorate"
+                                className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                            >
+                                {isArabic ? "المحافظة" : "Governorate"}
+                            </label>
 
-  <select
-    id="governorate"
-    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]"
-  >
-    <option value="">
-      {isArabic
-        ? "اختر المحافظة"
-        : "Select governorate"}
-    </option>
+                            <select
+                                id="governorate"
+                                value={formData.governorate}
+                                onChange={handleChange}
+                                className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]"
+                            >
+                                <option value="">
+                                    {isArabic
+                                        ? "اختر المحافظة"
+                                        : "Select governorate"}
+                                </option>
 
-    <option value="cairo">
-      {isArabic ? "القاهرة" : "Cairo"}
-    </option>
+                                <option value="cairo">
+                                    {isArabic ? "القاهرة" : "Cairo"}
+                                </option>
 
-    <option value="giza">
-      {isArabic ? "الجيزة" : "Giza"}
-    </option>
+                                <option value="giza">
+                                    {isArabic ? "الجيزة" : "Giza"}
+                                </option>
 
-    <option value="alexandria">
-      {isArabic ? "الإسكندرية" : "Alexandria"}
-    </option>
+                                <option value="alexandria">
+                                    {isArabic ? "الإسكندرية" : "Alexandria"}
+                                </option>
 
-    <option value="dakahlia">
-      {isArabic ? "الدقهلية" : "Dakahlia"}
-    </option>
+                                <option value="dakahlia">
+                                    {isArabic ? "الدقهلية" : "Dakahlia"}
+                                </option>
 
-    <option value="sharqia">
-      {isArabic ? "الشرقية" : "Sharqia"}
-    </option>
+                                <option value="sharqia">
+                                    {isArabic ? "الشرقية" : "Sharqia"}
+                                </option>
 
-    <option value="gharbia">
-      {isArabic ? "الغربية" : "Gharbia"}
-    </option>
+                                <option value="gharbia">
+                                    {isArabic ? "الغربية" : "Gharbia"}
+                                </option>
 
-    <option value="monufia">
-      {isArabic ? "المنوفية" : "Monufia"}
-    </option>
+                                <option value="monufia">
+                                    {isArabic ? "المنوفية" : "Monufia"}
+                                </option>
 
-    <option value="qalyubia">
-      {isArabic ? "القليوبية" : "Qalyubia"}
-    </option>
+                                <option value="qalyubia">
+                                    {isArabic ? "القليوبية" : "Qalyubia"}
+                                </option>
 
-  </select>
-</div>
+                            </select>
+                        </div>
 
-{/* Full Address */}
+                        {/* Full Address */}
 
-<div className="md:col-span-2">
-  <label
-    htmlFor="address"
-    className="mb-2 block text-sm font-medium text-[var(--foreground)]"
-  >
-    {isArabic
-      ? "العنوان بالتفصيل"
-      : "Full Address"}
-  </label>
+                        <div className="md:col-span-2">
+                            <label
+                                htmlFor="address"
+                                className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                            >
+                                {isArabic
+                                    ? "العنوان بالتفصيل"
+                                    : "Full Address"}
+                            </label>
 
-  <textarea
-    id="address"
-    rows={3}
-    placeholder={
-      isArabic
-        ? "اسم الشارع، رقم المبنى، الدور، الشقة..."
-        : "Street, building number, floor, apartment..."
-    }
-    className="w-full resize-none rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]"
-  />
-</div>
+                            <textarea
+                                id="details"
+                                value={formData.details}
+                                onChange={handleChange}
+                                rows={3}
+                                placeholder={
+                                    isArabic
+                                        ? "اسم الشارع، رقم المبنى، الدور، الشقة..."
+                                        : "Street, building number, floor, apartment..."
+                                }
+                                className="w-full resize-none rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]"
+                            />
+                        </div>
                         {/* Terms */}
 
                         <label className="flex cursor-pointer items-start gap-2 text-sm text-[var(--muted)]">
@@ -376,15 +532,31 @@ export default function RegisterPage() {
 
                         </label>
 
+                        {error && (
+                            <p className="md:col-span-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-500">
+                                {error}
+                            </p>
+                        )}
+
+                        {success && (
+                            <p className="md:col-span-2 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-500">
+                                {success}
+                            </p>
+                        )}
                         {/* Button */}
 
                         <button
                             type="submit"
-                            className="w-full rounded-lg bg-[var(--primary)] px-6 py-3.5 font-medium text-white transition hover:opacity-90"
+                            disabled={loading}
+                            className="md:col-span-2 w-full rounded-lg bg-[var(--primary)] px-6 py-3.5 font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {isArabic
-                                ? "إنشاء الحساب"
-                                : "Create Account"}
+                            {loading
+                                ? isArabic
+                                    ? "جاري إنشاء الحساب..."
+                                    : "Creating account..."
+                                : isArabic
+                                    ? "إنشاء الحساب"
+                                    : "Create Account"}
                         </button>
 
                     </form>
