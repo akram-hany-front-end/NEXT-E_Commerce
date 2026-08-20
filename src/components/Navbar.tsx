@@ -8,7 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useFavorites } from "@/components/FavoritesProvider";
 import { translations } from "./translation";
-
+import { signOut, useSession } from "next-auth/react";
 import {
     Moon,
     ShoppingCart,
@@ -17,9 +17,12 @@ import {
     Menu,
     X,
     Heart,
+    LogIn,
+    LogOut,
 } from "lucide-react";
 
 export default function Navbar() {
+    const { data: session, status } = useSession();
     const { cartCount } = useCart();
     const { language, setLanguage } = useLanguage();
     const { theme, setTheme } = useTheme();
@@ -153,8 +156,32 @@ export default function Navbar() {
                     )}
                 </Link>
 
-            </div>
+                {status === "loading" ? (
+                    <div className="h-9 w-20 animate-pulse rounded-lg bg-[var(--border)]" />
+                ) : session ? (
+                    <button
+                        onClick={() =>
+                            signOut({
+                                callbackUrl: "/login",
+                            })
+                        }
+                        className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)] transition hover:bg-red-500 hover:text-white"
+                    >
+                        <LogOut size={20} />
 
+
+                    </button>
+                ) : (
+                    <Link
+                        href="/login"
+                        className="flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
+                    >
+                        <LogIn size={20} />
+
+
+                    </Link>
+                )}
+            </div>
             {/* Mobile Menu Button */}
             <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -246,11 +273,11 @@ export default function Navbar() {
                             >
                                 {t.navbar.contact}
                             </Link>
-                        
+
                         </div>
 
-<div className="">
-        <Link
+                        <div className="">
+                            <Link
                                 href="/favorites"
                                 onClick={() => setIsMenuOpen(false)}
                                 className="flex items-center justify-between rounded-lg  py-3"
@@ -269,26 +296,26 @@ export default function Navbar() {
                                 )}
                             </Link>
 
-<Link
-  href="/cart"
-  onClick={() => setIsMenuOpen(false)}
-  className="flex items-center justify-between rounded-lg  py-3 text-[var(--foreground)] transition hover:bg-[var(--background)]"
->
-  <div className="flex items-center gap-3">
-    <ShoppingCart size={25} />
+                            <Link
+                                href="/cart"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="flex items-center justify-between rounded-lg  py-3 text-[var(--foreground)] transition hover:bg-[var(--background)]"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <ShoppingCart size={25} />
 
-    <span>
-      {language === "ar" ? "السلة" : "Cart"}
-    </span>
-  </div>
+                                    <span>
+                                        {language === "ar" ? "السلة" : "Cart"}
+                                    </span>
+                                </div>
 
-  {cartCount > 0 && (
-    <span className="rounded-full bg-[var(--primary)] px-2 py-1 text-xs font-medium text-white">
-      {cartCount}
-    </span>
-  )}
-</Link>
-</div>
+                                {cartCount > 0 && (
+                                    <span className="rounded-full bg-[var(--primary)] px-2 py-1 text-xs font-medium text-white">
+                                        {cartCount}
+                                    </span>
+                                )}
+                            </Link>
+                        </div>
                         {/* Mobile Search */}
                         <div className="relative mt-10">
 
@@ -308,6 +335,31 @@ export default function Navbar() {
                         {/* Mobile Actions */}
                         <div className="mt-8 flex items-center gap-4 border-t border-[var(--border)] pt-6">
 
+                            {status === "loading" ? (
+                                <div className="h-9 w-20 animate-pulse rounded-lg bg-[var(--border)]" />
+                            ) : session ? (
+                                <button
+                                    onClick={() =>
+                                        signOut({
+                                            callbackUrl: "/login",
+                                        })
+                                    }
+                                    className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)] transition hover:bg-red-500 hover:text-white"
+                                >
+                                    <LogOut size={20} />
+
+
+                                </button>
+                            ) : (
+                                <Link
+                                    href="/login"
+                                    className="flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
+                                >
+                                    <LogIn size={20} />
+
+
+                                </Link>
+                            )}
                             <button
                                 onClick={toggleLanguage}
                                 className="cursor-pointer rounded-md border border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)] transition hover:bg-[var(--surface)]"

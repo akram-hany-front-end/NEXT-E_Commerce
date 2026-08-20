@@ -148,7 +148,7 @@ export default function ProductsPage() {
   const [favorites, setFavorites] = useState<number[]>([]);
 
   const filteredProducts = useMemo(() => {
-    let result = products.filter((product) => {
+    const result = products.filter((product) => {
       const productName = isArabic
         ? product.name.ar
         : product.name.en;

@@ -1,16 +1,86 @@
 "use client";
 
 import Link from "next/link";
-import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
+import {
+    Eye,
+    EyeOff,
+    LockKeyhole,
+    Mail,
+} from "lucide-react";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 
 import { useLanguage } from "@/components/LanguageProvider";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+
     const { language } = useLanguage();
+    const router = useRouter();
     const isArabic = language === "ar";
 
-    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword, setShowPassword] =
+        useState(false);
+
+    const [formData, setFormData] = useState({
+        email: "",
+        password: "",
+    });
+
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const { id, value } = e.target;
+
+        setFormData((prev) => ({
+            ...prev,
+            [id]: value,
+        }));
+    };
+
+    const handleSubmit = async (
+        e: React.FormEvent<HTMLFormElement>
+    ) => {
+        e.preventDefault();
+
+        setError("");
+        setLoading(true);
+
+        try {
+            const result = await signIn("credentials", {
+                email: formData.email,
+                password: formData.password,
+                redirect: false,
+            });
+
+            if (result?.error) {
+                setError(
+                    isArabic
+                        ? "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+                        : "Invalid email or password"
+                );
+
+                return;
+            }
+
+      if (result?.ok) {
+    router.push("/products");
+    router.refresh();
+    return;
+}
+        } catch {
+            setError(
+                isArabic
+                    ? "حدث خطأ أثناء تسجيل الدخول"
+                    : "Something went wrong"
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <main className="flex min-h-screen items-center justify-center bg-[var(--background)] px-5 py-10">
@@ -46,7 +116,10 @@ export default function LoginPage() {
 
                 <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm md:p-8">
 
-                    <form className="space-y-5">
+                    <form
+                        onSubmit={handleSubmit}
+                        className="space-y-5"
+                    >
 
                         {/* Email */}
 
@@ -71,6 +144,9 @@ export default function LoginPage() {
                                 <input
                                     id="email"
                                     type="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
                                     placeholder="example@email.com"
                                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] py-3 pe-4 ps-11 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]"
                                 />
@@ -114,7 +190,14 @@ export default function LoginPage() {
 
                                 <input
                                     id="password"
-                                    type={showPassword ? "text" : "password"}
+                                    type={
+                                        showPassword
+                                            ? "text"
+                                            : "password"
+                                    }
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
                                     placeholder={
                                         isArabic
                                             ? "أدخل كلمة المرور"
@@ -126,7 +209,9 @@ export default function LoginPage() {
                                 <button
                                     type="button"
                                     onClick={() =>
-                                        setShowPassword(!showPassword)
+                                        setShowPassword(
+                                            !showPassword
+                                        )
                                     }
                                     className="absolute end-3 top-1/2 -translate-y-1/2 p-1 text-[var(--muted)] hover:text-[var(--foreground)]"
                                 >
@@ -140,6 +225,14 @@ export default function LoginPage() {
                             </div>
 
                         </div>
+
+                        {/* Error */}
+
+                        {error && (
+                            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-500">
+                                {error}
+                            </p>
+                        )}
 
                         {/* Remember */}
 
@@ -160,11 +253,16 @@ export default function LoginPage() {
 
                         <button
                             type="submit"
-                            className="w-full rounded-lg bg-[var(--primary)] px-6 py-3.5 font-medium text-white transition hover:opacity-90"
+                            disabled={loading}
+                            className="w-full rounded-lg bg-[var(--primary)] px-6 py-3.5 font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {isArabic
-                                ? "تسجيل الدخول"
-                                : "Sign In"}
+                            {loading
+                                ? isArabic
+                                    ? "جاري تسجيل الدخول..."
+                                    : "Signing in..."
+                                : isArabic
+                                    ? "تسجيل الدخول"
+                                    : "Sign In"}
                         </button>
 
                     </form>
