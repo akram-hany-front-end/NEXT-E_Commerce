@@ -592,17 +592,12 @@ export default function ProductsPage() {
                                     required
                                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--primary)]"
                                 />
-
                             </div>
-
                             {/* Category */}
-
                             <div className="space-y-2">
-
                                 <label className="text-sm font-medium text-[var(--foreground)]">
                                     Category
                                 </label>
-
                                 <select
                                     value={productCategory}
                                     onChange={(e) =>
@@ -611,11 +606,9 @@ export default function ProductsPage() {
                                     required
                                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)]"
                                 >
-
                                     <option value="">
                                         Select category
                                     </option>
-
                                     {categories.map((category) => (
                                         <option
                                             key={category.id}
@@ -624,21 +617,14 @@ export default function ProductsPage() {
                                             {category.name}
                                         </option>
                                     ))}
-
                                 </select>
-
                             </div>
-
                             {/* Price + Stock */}
-
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-
                                 <div className="space-y-2">
-
                                     <label className="text-sm font-medium text-[var(--foreground)]">
                                         Price
                                     </label>
-
                                     <input
                                         type="number"
                                         min="0"
@@ -650,15 +636,11 @@ export default function ProductsPage() {
                                         required
                                         className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--primary)]"
                                     />
-
                                 </div>
-
                                 <div className="space-y-2">
-
                                     <label className="text-sm font-medium text-[var(--foreground)]">
                                         Stock
                                     </label>
-
                                     <input
                                         type="number"
                                         min="0"
@@ -672,11 +654,8 @@ export default function ProductsPage() {
                                     />
                                 </div>
                             </div>
-
                             {/* Buttons */}
-
                             <div className="flex gap-3 pt-2">
-
                                 <button
                                     type="button"
                                     onClick={closeProductModal}
@@ -684,7 +663,6 @@ export default function ProductsPage() {
                                 >
                                     Cancel
                                 </button>
-
                                 <button
                                     type="submit"
                                     className="flex-1 rounded-lg bg-[var(--primary)] px-4 py-3 text-sm font-medium text-white transition hover:opacity-90"
@@ -693,25 +671,16 @@ export default function ProductsPage() {
                                         ? "Save Changes"
                                         : "Add Product"}
                                 </button>
-
                             </div>
-
                         </form>
-
                     </div>
-
                 </div>
-
             )}
-
             {/* =========================
-          Add Category Modal
+        Add Category Modal
       ========================= */}
-
             {showCategoryModal && (
-
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-
                     <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl">
 
                         <div className="mb-6 flex items-center justify-between">

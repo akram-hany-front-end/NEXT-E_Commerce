@@ -1,6 +1,5 @@
 "use client";
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     User,
     Mail,
@@ -14,60 +13,111 @@ import {
     EyeOff,
 } from "lucide-react";
 
+type Profile = {
+    _id: string;
+    name: string;
+    email: string;
+    phone: string;
+    role: "USER" | "ADMIN";
+    address: {
+        city: string;
+        details: string;
+        governorate: string;
+    };
+};
 export default function ProfilePage() {
-    const [name, setName] = useState("Arkan Admin");
-    const [email, setEmail] = useState("admin@arkan.com");
-    const [phone, setPhone] = useState("01000000000");
-    const [city, setCity] = useState("Mansoura");
-
-    const [currentPassword, setCurrentPassword] =
-        useState("");
-
-    const [newPassword, setNewPassword] =
-        useState("");
-
-    const [confirmPassword, setConfirmPassword] =
-        useState("");
-
-    const [showCurrentPassword, setShowCurrentPassword] =
-        useState(false);
-
-    const [showNewPassword, setShowNewPassword] =
-        useState(false);
-
-    const [showConfirmPassword, setShowConfirmPassword] =
-        useState(false);
-
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
+    const [city, setCity] = useState("");
+    const [profile, setProfile] = useState<Profile | null>(null);
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [message, setMessage] = useState("");
+  const handleProfileSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+) => {
+    e.preventDefault();
 
-    const handleProfileSubmit = (
-        e: React.FormEvent<HTMLFormElement>
-    ) => {
-        e.preventDefault();
+    try {
+        const res = await fetch("/api/profile", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                name,
+                email,
+                phone,
+                address: {
+                    city,
+                },
+            }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            setMessage(
+                data.message || "Failed to update profile"
+            );
+            return;
+        }
+
+        setProfile(data.profile);
+
+        setName(data.profile.name);
+        setEmail(data.profile.email);
+        setPhone(data.profile.phone);
+        setCity(data.profile.address?.city || "");
 
         setMessage("Profile updated successfully.");
 
         setTimeout(() => {
             setMessage("");
         }, 3000);
-    };
 
-    const handlePasswordSubmit = (
-        e: React.FormEvent<HTMLFormElement>
-    ) => {
-        e.preventDefault();
+    } catch (error) {
+        console.error("Update profile error:", error);
+        setMessage("Something went wrong");
+    }
+};
 
-        if (
-            !currentPassword ||
-            !newPassword ||
-            !confirmPassword
-        ) {
-            setMessage("Please fill all password fields.");
-            return;
-        }
+   const handlePasswordSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+) => {
+    e.preventDefault();
 
-        if (newPassword !== confirmPassword) {
-            setMessage("New passwords do not match.");
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        setMessage("Please fill all password fields.");
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        setMessage("New passwords do not match.");
+        return;
+    }
+
+    try {
+        const res = await fetch("/api/profile", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                currentPassword,
+                newPassword,
+            }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            setMessage(data.message || "Failed to change password");
             return;
         }
 
@@ -80,13 +130,51 @@ export default function ProfilePage() {
         setTimeout(() => {
             setMessage("");
         }, 3000);
-    };
+    } catch (error) {
+        console.error("Change password error:", error);
+        setMessage("Something went wrong");
+    }
+};
+const fetchProfile = async () => {
+    try {
+        const res = await fetch("/api/profile");
 
+        const data = await res.json();
+
+        if (!res.ok) {
+            setMessage(data.message || "Failed to fetch profile");
+            return;
+        }
+
+        if (!data.profile) {
+            setMessage("Profile not found");
+            return;
+        }
+
+        setProfile(data.profile);
+
+        setName(data.profile.name || "");
+        setEmail(data.profile.email || "");
+        setPhone(data.profile.phone || "");
+        setCity(data.profile.address?.city || "");
+    } catch (error) {
+        console.error("Fetch profile error:", error);
+        setMessage("Something went wrong");
+    }
+};
+
+useEffect(() => {
+
+    const save = async ()=> {
+        await fetchProfile()
+    }
+    save()
+}, []);
     return (
         <main className="min-h-screen bg-[var(--background)] p-6 md:p-8">
 
             {/* =========================
-          Header
+        Header
       ========================= */}
 
             <div className="mb-8">
@@ -102,7 +190,7 @@ export default function ProfilePage() {
             </div>
 
             {/* =========================
-          Success / Error Message
+        Success / Error Message
       ========================= */}
 
             {message && (
@@ -150,11 +238,10 @@ export default function ProfilePage() {
 
                         {/* Role */}
 
-                        <div className="mt-4 flex items-center gap-2 rounded-full bg-[var(--primary)]/10 px-4 py-2 text-sm font-medium text-[var(--primary)]">
-                            <ShieldCheck size={17} />
-                            Administrator
-                        </div>
-
+                    <div className="mt-4 flex items-center gap-2 rounded-full bg-[var(--primary)]/10 px-4 py-2 text-sm font-medium text-[var(--primary)]">
+    <ShieldCheck size={17} />
+    {profile?.role === "ADMIN" ? "Administrator" : "User"}
+</div>
                     </div>
 
                     {/* Account Info */}
@@ -182,7 +269,7 @@ export default function ProfilePage() {
                                     </p>
 
                                     <p className="text-sm font-medium text-[var(--foreground)]">
-                                        Admin
+                                        {profile?.role}
                                     </p>
                                 </div>
 
@@ -203,7 +290,7 @@ export default function ProfilePage() {
                                     </p>
 
                                     <p className="truncate text-sm font-medium text-[var(--foreground)]">
-                                        {email}
+                                        {profile?.email}
                                     </p>
                                 </div>
 
@@ -224,7 +311,7 @@ export default function ProfilePage() {
                                     </p>
 
                                     <p className="text-sm font-medium text-[var(--foreground)]">
-                                        {phone}
+                                        {profile?.phone}
                                     </p>
                                 </div>
 
@@ -245,7 +332,7 @@ export default function ProfilePage() {
                                     </p>
 
                                     <p className="text-sm font-medium text-[var(--foreground)]">
-                                        {city}
+                                        {profile?.address.city}
                                     </p>
                                 </div>
 
@@ -419,7 +506,7 @@ export default function ProfilePage() {
                     </section>
 
                     {/* =========================
-              Change Password
+            Change Password
           ========================= */}
 
                     <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">

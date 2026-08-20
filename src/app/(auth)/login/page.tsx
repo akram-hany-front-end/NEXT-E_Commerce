@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import {
     Eye,
@@ -9,71 +8,57 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { signIn , getSession } from "next-auth/react";
-
 import { useLanguage } from "@/components/LanguageProvider";
 import { useRouter } from "next/navigation";
-
 export default function LoginPage() {
 
     const { language } = useLanguage();
     const router = useRouter();
     const isArabic = language === "ar";
-
     const [showPassword, setShowPassword] =
         useState(false);
-
     const [formData, setFormData] = useState({
         email: "",
         password: "",
     });
-
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         const { id, value } = e.target;
-
         setFormData((prev) => ({
             ...prev,
             [id]: value,
         }));
     };
-
     const handleSubmit = async (
         e: React.FormEvent<HTMLFormElement>
     ) => {
         e.preventDefault();
-
         setError("");
         setLoading(true);
-
         try {
             const result = await signIn("credentials", {
                 email: formData.email,
                 password: formData.password,
                 redirect: false,
             });
-
             if (result?.error) {
                 setError(
                     isArabic
                         ? "البريد الإلكتروني أو كلمة المرور غير صحيحة"
                         : "Invalid email or password"
                 );
-
                 return;
             }
 if (result?.ok) {
     const session = await getSession();
-
     if (session?.user.role === "ADMIN") {
         router.push("/admin");
     } else {
         router.push("/products");
     }
-
     router.refresh();
     return;
 }
@@ -87,7 +72,6 @@ if (result?.ok) {
             setLoading(false);
         }
     };
-
     return (
         <main className="flex min-h-screen items-center justify-center bg-[var(--background)] px-5 py-10">
 

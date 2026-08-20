@@ -1,22 +1,16 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
-
 export interface IProfile extends Document {
     user: mongoose.Types.ObjectId;
-
     phone?: string;
-
     avatar?: string;
-
     address?: {
         governorate?: string;
         city?: string;
         details?: string;
     };
-
     createdAt: Date;
     updatedAt: Date;
 }
-
 const ProfileSchema = new Schema<IProfile>(
     {
         user: {
@@ -57,9 +51,7 @@ const ProfileSchema = new Schema<IProfile>(
         timestamps: true,
     }
 );
-
 const Profile: Model<IProfile> =
     mongoose.models.Profile ||
     mongoose.model<IProfile>("Profile", ProfileSchema);
-
 export default Profile;

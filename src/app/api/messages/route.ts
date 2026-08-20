@@ -1,36 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import Product from "@/app/models/Product";
-import Category from "@/app/models/Category";
-
-export async function GET() {
-    try {
-        await connectDB();
-
-        const products = await Product.find()
-            .populate("category")
-            .sort({ createdAt: -1 })
-            .lean();
-
-        return NextResponse.json(
-            {
-                success: true,
-                products,
-            },
-            { status: 200 }
-        );
-    } catch (error) {
-        console.error("GET PRODUCTS ERROR:", error);
-
-        return NextResponse.json(
-            {
-                success: false,
-                message: "Failed to fetch products",
-            },
-            { status: 500 }
-        );
-    }
-}
+import Message from "@/app/models/Message";
 
 export async function POST(request: Request) {
     try {
@@ -39,111 +9,78 @@ export async function POST(request: Request) {
         const body = await request.json();
 
         const {
+            user,
             name,
-            slug,
-            description,
-            price,
-            oldPrice,
-            category,
-            images,
-            stock,
-            isActive,
-            isFeatured,
+            email,
+            phone,
+            subject,
+            message,
         } = body;
 
-        if (
-            !name ||
-            !slug ||
-            !description ||
-            price === undefined ||
-            !category
-        ) {
+        if (!name || !email || !subject || !message) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Required fields are missing",
+                    message: "Name, email, subject and message are required",
                 },
                 { status: 400 }
             );
         }
 
-        const existingProduct = await Product.findOne({
-            $or: [
-                { name },
-                { slug: slug.toLowerCase() },
-            ],
+        const newMessage = await Message.create({
+            user: user || undefined,
+            name,
+            email,
+            phone,
+            subject,
+            message,
+            status: "UNREAD",
         });
-
-        if (existingProduct) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message:
-                        "Product with this name or slug already exists",
-                },
-                { status: 409 }
-            );
-        }
-
-        const categoryExists = await Category.findById(
-            category
-        );
-
-        if (!categoryExists) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Category not found",
-                },
-                { status: 404 }
-            );
-        }
-
-        const product = await Product.create({
-            name: name.trim(),
-            slug: slug.trim().toLowerCase(),
-            description: description.trim(),
-            price: Number(price),
-            oldPrice:
-                oldPrice !== undefined &&
-                oldPrice !== ""
-                    ? Number(oldPrice)
-                    : undefined,
-            category,
-            images: Array.isArray(images)
-                ? images
-                : [],
-            stock: Number(stock ?? 0),
-            isActive:
-                isActive !== undefined
-                    ? Boolean(isActive)
-                    : true,
-            isFeatured:
-                isFeatured !== undefined
-                    ? Boolean(isFeatured)
-                    : false,
-        });
-
-        const populatedProduct =
-            await Product.findById(product._id)
-                .populate("category")
-                .lean();
 
         return NextResponse.json(
             {
                 success: true,
-                message: "Product created successfully",
-                product: populatedProduct,
+                message: "Message sent successfully",
+                data: newMessage,
             },
             { status: 201 }
         );
     } catch (error) {
-        console.error("CREATE PRODUCT ERROR:", error);
+        console.error("Send message error:", error);
 
         return NextResponse.json(
             {
                 success: false,
-                message: "Failed to create product",
+                message: "Failed to send message",
+            },
+            { status: 500 }
+        );
+    }
+}
+
+export async function GET() {
+    try {
+        await connectDB();
+
+        const messages = await Message.find({})
+            .populate("user", "name email")
+            .sort({ createdAt: -1 })
+            .lean();
+
+        return NextResponse.json(
+            {
+                success: true,
+                messages,
+            },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error("Get messages error:", error);
+
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Failed to fetch messages",
             },
             { status: 500 }
         );
