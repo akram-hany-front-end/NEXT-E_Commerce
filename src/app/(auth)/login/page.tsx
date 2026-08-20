@@ -8,7 +8,7 @@ import {
     Mail,
 } from "lucide-react";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn , getSession } from "next-auth/react";
 
 import { useLanguage } from "@/components/LanguageProvider";
 import { useRouter } from "next/navigation";
@@ -65,9 +65,15 @@ export default function LoginPage() {
 
                 return;
             }
+if (result?.ok) {
+    const session = await getSession();
 
-      if (result?.ok) {
-    router.push("/products");
+    if (session?.user.role === "ADMIN") {
+        router.push("/admin");
+    } else {
+        router.push("/products");
+    }
+
     router.refresh();
     return;
 }
