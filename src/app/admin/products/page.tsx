@@ -10,6 +10,7 @@ import {
     X,
     FolderPlus,
 } from "lucide-react";
+import ImageUpload from "@/components/ImageUpload";
 
 type Category = {
     id: string;
@@ -75,7 +76,7 @@ export default function ProductsPage() {
         useState<Category[]>(initialCategories);
 
     const [search, setSearch] = useState("");
-
+    const [images, setImages] = useState<string[]>([]);
     const [showProductModal, setShowProductModal] =
         useState(false);
 
@@ -438,8 +439,8 @@ export default function ProductsPage() {
 
                                         <span
                                             className={`rounded-full px-3 py-1 text-xs font-medium ${product.status === "active"
-                                                    ? "bg-green-500/10 text-green-600"
-                                                    : "bg-red-500/10 text-red-600"
+                                                ? "bg-green-500/10 text-green-600"
+                                                : "bg-red-500/10 text-red-600"
                                                 }`}
                                         >
                                             {product.status ===
@@ -561,7 +562,18 @@ export default function ProductsPage() {
                             onSubmit={handleProductSubmit}
                             className="space-y-5"
                         >
+                            {/* image */}
 
+                            <div>
+                                <label className="mb-2 block text-sm font-medium">
+                                    Product Images
+                                </label>
+
+                                <ImageUpload
+                                    images={images}
+                                    setImages={setImages}
+                                />
+                            </div>
                             {/* Name */}
 
                             <div className="space-y-2">
@@ -658,9 +670,7 @@ export default function ProductsPage() {
                                         required
                                         className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted)]"
                                     />
-
                                 </div>
-
                             </div>
 
                             {/* Buttons */}
