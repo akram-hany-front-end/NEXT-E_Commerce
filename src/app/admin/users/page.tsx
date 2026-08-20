@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Search,
     Users,
@@ -14,83 +14,115 @@ type User = {
     name: string;
     email: string;
     phone: string;
-    role: "user" | "admin";
+    role: "USER" | "ADMIN";
     city: string;
-    joinedAt: string;
-    status: "active" | "blocked";
+    createdAt: string;
 };
 
-const usersData: User[] = [
-    {
-        id: "USR-10001",
-        name: "Ahmed Mohamed",
-        email: "ahmed@example.com",
-        phone: "01012345678",
-        role: "user",
-        city: "Mansoura",
-        joinedAt: "Aug 18, 2026",
-        status: "active",
-    },
-    {
-        id: "USR-10002",
-        name: "Sara Ali",
-        email: "sara@example.com",
-        phone: "01198765432",
-        role: "user",
-        city: "Cairo",
-        joinedAt: "Aug 17, 2026",
-        status: "active",
-    },
-    {
-        id: "USR-10003",
-        name: "Omar Hassan",
-        email: "omar@example.com",
-        phone: "01255555555",
-        role: "user",
-        city: "Alexandria",
-        joinedAt: "Aug 16, 2026",
-        status: "blocked",
-    },
-    {
-        id: "USR-10004",
-        name: "Admin Arkan",
-        email: "admin@arkan.com",
-        phone: "01000000000",
-        role: "admin",
-        city: "Mansoura",
-        joinedAt: "Aug 10, 2026",
-        status: "active",
-    },
-];
 
 export default function UsersPage() {
-    const [users, setUsers] = useState<User[]>(usersData);
     const [search, setSearch] = useState("");
+    const [users, setUsers] = useState<User[]>([]);
+    const [message, setMessage] = useState("");
 
-    const filteredUsers = users.filter((user) => {
-        const value = search.toLowerCase();
+const filteredUsers = users.filter((user) => {
+    const value = search.toLowerCase();
 
-        return (
-            user.id.toLowerCase().includes(value) ||
-            user.name.toLowerCase().includes(value) ||
-            user.email.toLowerCase().includes(value) ||
-            user.phone.includes(value) ||
-            user.city.toLowerCase().includes(value)
-        );
-    });
+    return (
+        user.id ||
+        user.name.toLowerCase().includes(value) ||
+        user.email.toLowerCase().includes(value) ||
+        user.phone.includes(value) ||
+        user.city.toLowerCase().includes(value)
+    );
+});
 
-    const deleteUser = (id: string) => {
-        const confirmed = window.confirm(
-            "Are you sure you want to delete this user?"
-        );
+const deleteUser = async (id: string) => {
+    const confirmed = window.confirm(
+        "Are you sure you want to delete this user?"
+    );
 
-        if (!confirmed) return;
+    if (!confirmed) return;
+
+    try {
+        const res = await fetch(`/api/users?id=${id}`, {
+            method: "DELETE",
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            setMessage(data.message || "Failed to delete user");
+            return;
+        }
 
         setUsers((prev) =>
             prev.filter((user) => user.id !== id)
         );
-    };
 
+        setMessage("User deleted successfully.");
+
+        setTimeout(() => {
+            setMessage("");
+        }, 3000);
+
+    } catch (error) {
+        console.error("Delete user error:", error);
+        setMessage("Something went wrong");
+    }
+};
+
+
+
+const fetchUsers = async () => {
+    try {
+        const res = await fetch("/api/users");
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            setMessage(data.message || "Failed to fetch users");
+            return;
+        }
+
+        const formattedUsers: User[] = data.users.map(
+            (user: {
+                _id: string;
+                name: string;
+                email: string;
+                phone: string;
+                role: "USER" | "ADMIN";
+                address?: {
+                    city?: string;
+                };
+                createdAt: string;
+            }) => ({
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                role: user.role,
+                city: user.address?.city || "",
+                createdAt: user.createdAt,
+            })
+        );
+
+        setUsers(formattedUsers);
+    } catch (error) {
+        console.error("Get Users error:", error);
+        setMessage("Something went wrong");
+    }
+};
+
+
+    useEffect(() => {
+        const save = async () => {
+            await fetchUsers()
+        }
+        save()
+    }
+        , []
+    )
     return (
         <main className="min-h-screen bg-[var(--background)] p-6 md:p-8">
 
@@ -163,9 +195,7 @@ export default function UsersPage() {
                                     Role
                                 </th>
 
-                                <th className="px-5 py-4 text-start font-semibold text-[var(--foreground)]">
-                                    Status
-                                </th>
+                                
 
                                 <th className="px-5 py-4 text-start font-semibold text-[var(--foreground)]">
                                     Joined
@@ -228,9 +258,9 @@ export default function UsersPage() {
                                     <td className="px-5 py-5">
 
                                         <span
-                                            className={`rounded-full px-3 py-1 text-xs font-medium ${user.role === "admin"
-                                                    ? "bg-[var(--primary)]/15 text-[var(--primary)]"
-                                                    : "bg-gray-500/10 text-[var(--muted)]"
+                                            className={`rounded-full px-3 py-1 text-xs font-medium ${user.role === "ADMIN"
+                                                ? "bg-[var(--primary)]/15 text-[var(--primary)]"
+                                                : "bg-gray-500/10 text-[var(--muted)]"
                                                 }`}
                                         >
                                             {user.role}
@@ -238,24 +268,11 @@ export default function UsersPage() {
 
                                     </td>
 
-                                    {/* Status */}
-                                    <td className="px-5 py-5">
-
-                                        <span
-                                            className={`rounded-full px-3 py-1 text-xs font-medium ${user.status === "active"
-                                                    ? "bg-green-500/10 text-green-600"
-                                                    : "bg-red-500/10 text-red-600"
-                                                }`}
-                                        >
-                                            {user.status}
-                                        </span>
-
-                                    </td>
+                                   
 
                                     {/* Joined */}
                                     <td className="px-5 py-5 text-[var(--muted)]">
-                                        {user.joinedAt}
-                                    </td>
+{new Date(user.createdAt).toLocaleDateString()}                                    </td>
 
                                     {/* Actions */}
                                     <td className="px-5 py-5">
@@ -314,12 +331,12 @@ export default function UsersPage() {
                                 </span>
 
                                 <span
-                                    className={`rounded-full px-3 py-1 text-xs font-medium ${user.status === "active"
-                                            ? "bg-green-500/10 text-green-600"
-                                            : "bg-red-500/10 text-red-600"
+                                    className={`rounded-full px-3 py-1 text-xs font-medium ${user.name === "active"
+                                        ? "bg-green-500/10 text-green-600"
+                                        : "bg-red-500/10 text-red-600"
                                         }`}
                                 >
-                                    {user.status}
+                                    {user.name}
                                 </span>
 
                             </div>
@@ -382,7 +399,7 @@ export default function UsersPage() {
                                     </span>
 
                                     <span className="text-[var(--foreground)]">
-                                        {user.joinedAt}
+                                        {user.createdAt}
                                     </span>
                                 </div>
 
