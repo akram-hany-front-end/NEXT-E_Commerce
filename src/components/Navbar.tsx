@@ -5,6 +5,7 @@ import { useLanguage } from "@/components/LanguageProvider";
 import { useTheme } from "@/components/ThemeProvider";
 import { useCart } from "@/components/CartProvider";
 import Image from "next/image";
+import { getSession } from "next-auth/react";
 import Link from "next/link";
 import { useFavorites } from "@/components/FavoritesProvider";
 import { translations } from "./translation";
@@ -19,6 +20,8 @@ import {
     Heart,
     LogIn,
     LogOut,
+    Store,
+    MessageCircle,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -49,7 +52,7 @@ export default function Navbar() {
             {/* Logo */}
             <Link href="/" className="shrink-0">
                 <Image
-                    className="rounded-full bg-gray-600 p-2"
+                    className="rounded-full p-2 border border-amber-300 hover:border-amber-500 hover:bg-gray-800 transition"
                     src="/logo.webp"
                     alt="Logo"
                     width={40}
@@ -59,6 +62,7 @@ export default function Navbar() {
 
             {/* Desktop Menu */}
             <div className="hidden items-center gap-6 md:flex">
+
 
                 <Link
                     href="/"
@@ -108,7 +112,19 @@ export default function Navbar() {
 
             {/* Desktop Buttons */}
             <div className="hidden items-center gap-4 md:flex">
-
+                {session?.user.role !== "ADMIN" ? "" : <Link
+                    href="/admin"
+                    className="text-[var(--foreground)] transition-opacity border p-2 border-[var(--border)] rounded-md hover:opacity-70"
+                >
+                    <Store size={18} />
+                </Link>}
+                {session?.user.role !== "ADMIN" ? <Link
+                    href="/messages"
+                    className="text-[var(--foreground)] transition-opacity border p-2 border-[var(--border)] rounded-md hover:opacity-70"
+                >
+                    <MessageCircle size={18} />
+                </Link>: "" }
+                
                 {/* Language */}
                 <button
                     onClick={toggleLanguage}
@@ -277,6 +293,7 @@ export default function Navbar() {
                         </div>
 
                         <div className="">
+
                             <Link
                                 href="/favorites"
                                 onClick={() => setIsMenuOpen(false)}
@@ -360,6 +377,12 @@ export default function Navbar() {
 
                                 </Link>
                             )}
+                            {session?.user.role !== "ADMIN" ? "" : <Link
+                                href="/admin"
+                                className="text-[var(--foreground)] transition-opacity border p-2 border-[var(--border)] rounded-md hover:opacity-70"
+                            >
+                                <Store size={18} />
+                            </Link>}
                             <button
                                 onClick={toggleLanguage}
                                 className="cursor-pointer rounded-md border border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)] transition hover:bg-[var(--surface)]"

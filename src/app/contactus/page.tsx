@@ -12,6 +12,9 @@ import {
 
 export default function ContactPage() {
     const { language } = useLanguage();
+    const [sent, setSent] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
     const isArabic = language === "ar";
 
@@ -22,7 +25,6 @@ export default function ContactPage() {
         message: "",
     });
 
-    const [sent, setSent] = useState(false);
 
     const handleChange = (
         e: React.ChangeEvent<
@@ -35,10 +37,60 @@ export default function ContactPage() {
         });
     };
 
-    const handleSubmit = (
-        e: React.FormEvent<HTMLFormElement>
-    ) => {
-        e.preventDefault();
+const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+) => {
+    e.preventDefault();
+
+    try {
+        setSent(false);
+
+        // Get logged-in user
+        const sessionRes = await fetch("/api/auth/session");
+
+        if (!sessionRes.ok) {
+            throw new Error("Failed to get session");
+        }
+
+        const session = await sessionRes.json();
+
+        console.log("SESSION:", session);
+
+        const userId = session.user?.id;
+
+        if (!userId) {
+            alert(
+                isArabic
+                    ? "يجب تسجيل الدخول لإرسال رسالة."
+                    : "You must be logged in to send a message."
+            );
+
+            return;
+        }
+
+        const res = await fetch("/api/messages", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                user: userId,
+                name: form.name,
+                email: form.email,
+                subject: form.subject,
+                message: form.message,
+            }),
+        });
+
+        const data = await res.json();
+
+        console.log("SEND MESSAGE RESPONSE:", data);
+
+        if (!res.ok) {
+            throw new Error(
+                data.message || "Failed to send message"
+            );
+        }
 
         setSent(true);
 
@@ -52,13 +104,23 @@ export default function ContactPage() {
         setTimeout(() => {
             setSent(false);
         }, 4000);
-    };
+
+    } catch (error) {
+        console.error("Send message error:", error);
+
+        alert(
+            isArabic
+                ? "حدث خطأ أثناء إرسال الرسالة."
+                : "Something went wrong while sending the message."
+        );
+    }
+};
 
     return (
         <main className="min-h-screen bg-[var(--background)] px-6 py-12 md:px-10 lg:px-16">
 
             {/* =========================
-          Header
+        Header
       ========================= */}
 
             <section className="mx-auto max-w-6xl">
@@ -88,7 +150,7 @@ export default function ContactPage() {
                 <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3">
 
                     {/* =========================
-              Contact Information
+            Contact Information
           ========================= */}
 
                     <div className="space-y-5">
@@ -96,7 +158,7 @@ export default function ContactPage() {
                         <ContactInfo
                             icon={Mail}
                             title={isArabic ? "البريد الإلكتروني" : "Email"}
-                            value="support@arkan.com"
+                            value="admin@gmail.com"
                         />
 
                         <ContactInfo
@@ -128,7 +190,7 @@ export default function ContactPage() {
                     </div>
 
                     {/* =========================
-              Contact Form
+            Contact Form
           ========================= */}
 
                     <div className="lg:col-span-2">
@@ -152,12 +214,18 @@ export default function ContactPage() {
                             </div>
 
                             {/* Success */}
-
                             {sent && (
                                 <div className="mb-6 rounded-lg border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-600">
                                     {isArabic
                                         ? "تم إرسال رسالتك بنجاح. شكرًا لتواصلك معنا."
                                         : "Your message has been sent successfully. Thank you for contacting us."}
+                                </div>
+                            )}
+
+                            {/* Error */}
+                            {error && (
+                                <div className="mb-6 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-600">
+                                    {error}
                                 </div>
                             )}
 
@@ -314,7 +382,7 @@ export default function ContactPage() {
 }
 
 /* =========================
-   Contact Info Component
+Contact Info Component
 ========================= */
 
 function ContactInfo({

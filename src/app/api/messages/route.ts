@@ -57,15 +57,27 @@ export async function POST(request: Request) {
         );
     }
 }
-
-export async function GET() {
+export async function GET(request: Request) {
     try {
         await connectDB();
 
-        const messages = await Message.find({})
+        const { searchParams } = new URL(request.url);
+        const userId = searchParams.get("user");
+
+        console.log("USER ID:", userId);
+
+        const filter = userId
+            ? { user: userId }
+            : {};
+
+        console.log("FILTER:", filter);
+
+        const messages = await Message.find(filter)
             .populate("user", "name email")
             .sort({ createdAt: -1 })
             .lean();
+
+        console.log("MESSAGES:", messages);
 
         return NextResponse.json(
             {
@@ -74,6 +86,7 @@ export async function GET() {
             },
             { status: 200 }
         );
+
     } catch (error) {
         console.error("Get messages error:", error);
 

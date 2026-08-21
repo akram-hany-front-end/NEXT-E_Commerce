@@ -29,7 +29,6 @@ const filteredUsers = users.filter((user) => {
     const value = search.toLowerCase();
 
     return (
-        user.id ||
         user.name.toLowerCase().includes(value) ||
         user.email.toLowerCase().includes(value) ||
         user.phone.includes(value) ||
@@ -279,12 +278,7 @@ const fetchUsers = async () => {
 
                                         <div className="flex items-center gap-2">
 
-                                            <button
-                                                title="View user"
-                                                className="rounded-md border border-[var(--border)] p-2 text-[var(--muted)] transition hover:bg-[var(--background)] hover:text-[var(--foreground)]"
-                                            >
-                                                <Eye size={17} />
-                                            </button>
+                                          
 
                                             <button
                                                 title="Delete user"
@@ -330,14 +324,8 @@ const fetchUsers = async () => {
                                     {user.id}
                                 </span>
 
-                                <span
-                                    className={`rounded-full px-3 py-1 text-xs font-medium ${user.name === "active"
-                                        ? "bg-green-500/10 text-green-600"
-                                        : "bg-red-500/10 text-red-600"
-                                        }`}
-                                >
-                                    {user.name}
-                                </span>
+                             
+                             
 
                             </div>
 
@@ -399,7 +387,7 @@ const fetchUsers = async () => {
                                     </span>
 
                                     <span className="text-[var(--foreground)]">
-                                        {user.createdAt}
+                                       {new Date(user.createdAt).toLocaleDateString()} 
                                     </span>
                                 </div>
 
@@ -408,16 +396,11 @@ const fetchUsers = async () => {
                             {/* Actions */}
                             <div className="mt-5 flex gap-2">
 
-                                <button
-                                    className="flex flex-1 items-center justify-center gap-2 rounded-md border border-[var(--border)] py-2 text-sm text-[var(--foreground)] transition hover:bg-[var(--background)]"
-                                >
-                                    <Eye size={16} />
-                                    View
-                                </button>
+                             
 
                                 <button
                                     onClick={() => deleteUser(user.id)}
-                                    className="rounded-md border border-[var(--border)] px-3 text-[var(--muted)] transition hover:bg-red-500/10 hover:text-red-500"
+                                    className="rounded-md border border-[var(--border)] p-2 text-[var(--muted)] transition hover:bg-red-500/10 hover:text-red-500"
                                 >
                                     <Trash2 size={17} />
                                 </button>
